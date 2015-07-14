@@ -1,0 +1,174 @@
+/*!
+ * @summary Captura y localización de domicilios geográficos
+ * @version 2.0
+ * @author Mario Hernández Morales / 2014-2015
+ * @copyrigh Instituto de Planeación, Estadística y Geografía del Estado de Guanaguato.
+ * @license GPL version 3 or any later version; http://www.gnu.org/copyleft/gpl.html
+ */
+ 
+/**
+ *
+ * Los campos aparecen homogeneos, probado en Chrome y Firefox.
+ *
+ * @alert
+ * Generar el archivo mini en producto final y utilizarlo.
+ * java -jar ~/Java/yuicompressor-2.4.8.jar init.css -o init.min.css --charset utf-8
+ * 
+ */
+
+html, body {
+	font-family: 'intro_bookregular' !important;
+	color: #888}
+h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
+	font-family: 'intro_boldregular' !important;
+	color: rgb(0, 167, 225)} 
+
+/* Estilo del mapa, similara a los campos imput */
+#map, #vis {
+	display: block;
+	margin: 0;
+	padding: 0px;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	width: 100% !important;
+	height: auto !important;
+	scrolling: "no";
+	padding-top: 52.94%;
+	background: white;
+	border: 1px solid #ccc;
+	outline: 0;
+	-moz-border-radius: 10px;
+	border-radius: 10px;
+	-moz-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 10px
+		rgba(204, 204, 204, .6);
+	-webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 10px
+		rgba(204, 204, 204, .6);
+	box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 10px
+		rgba(204, 204, 204, .6)
+}
+#vis {
+	height: 462px !important;
+	padding-top: 0;
+	background: transparent
+}
+/* Resalta el mapa cuando se está editando. Da más brillo a los campos de selección. */
+#map:hover, #vis:hover, .form-control:hover:enabled {
+	border-color: #66afe9;
+	-moz-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 10px
+		rgba(102, 175, 233, .8);
+	-webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 10px
+		rgba(102, 175, 233, .8);
+	box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 10px
+		rgba(102, 175, 233, .8)
+}
+
+.form-control:disabled {
+	opacity: .5!important;
+	cursor: default
+}
+
+/* Los campos cuando estén en error, también se muestre el iluminado, pero en rojo; en cualquier caso no solo hover. */
+.has-error .form-control, .has-error:hover .form-control{ 
+	border-color: #843534;
+	-moz-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 10px
+		rgba(206, 132, 131, .8);
+	-webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 10px
+		rgba(206, 132, 131, .8);
+	box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 10px
+		rgba(206, 132, 131, .8)
+}
+
+/* Hace que el mensaje de Cargando datos se muestre abaja a la derecha, flotante y con transparencia;
+ * también incluye una magen generada por http://ajaxload.info/
+ * el cursos se pone en modo de espera.
+ */
+#crgd{
+    position:   fixed;
+    z-index:    1000;
+    top:        0;
+    left:       0;
+    height:     100%;
+    width:      100%;
+    margin-left: 0px;
+    cursor: wait;
+	background: rgba( 255, 255, 255, .8 ) 
+                url('../img/loading.gif') 
+                50% 50% 
+                no-repeat
+}
+.crgdmsg {
+	position: fixed;
+	bottom: 10px;
+	right: 10px;
+	z-index: 10000;
+	opacity: 0.8;
+	-moz-transition: opacity 200ms ease-in-out 2s;
+	-webkit-transition: opacity 200ms ease-in-out 2s;
+	transition: opacity 200ms ease-in-out 2s
+}
+
+/* Logo. Optimizó la imágen con: optipng -o7 logo_gobierno.png */
+.img-logo, .img-logo2 {
+	background: transparent url(http://seieg.iplaneg.net/indicadores/assets/img/logo_gobierno.png) no-repeat center
+		center;
+	margin: auto;
+	position: static !important;
+	clear: both;
+	width: 100%;
+	height: 189px;
+	padding-top: 20px;
+	font-family: 'intro_light_capsregular' !important;
+	font-size: 14px
+}
+
+/* Logo. Optimizó la imágen con: optipng -o7 impulso-guanajuato.png */
+.img-footer {
+	clear: both;
+	background: #e6e6e6 url(http://seieg.iplaneg.net/indicadores/assets/img/impulso-guanajuato.png) no-repeat center
+		center;
+	margin: auto;
+	position: static !important;
+	clear: both;
+	width: 100%;
+	height: 127px;
+	padding-top: 20px;
+	font-family: 'intro_light_capsregular' !important;
+	font-size: 14px
+}
+
+/* Personaliza el pie de página*/
+.aviso-legal {
+	clear: both;
+	background: #ababab;
+	padding-bottom: 5px;
+	padding-top: 5px;
+	text-align: center;
+}
+button.link-footer {
+	color: #fff;
+	text-decoration: none;
+	padding-right: 15px;
+	cursor: help
+}
+button.link-footer:hover, button.link-footer:active{
+	color: #fff
+}
+
+/* Titulo principal */
+.barra-titulo, .barra-titulo2 {
+	background-color: #385E9D;
+	clear: both;
+	color: #FFF;
+	display: block;
+	min-width: 100%;
+	width: 100%;
+	height: 37px;
+	margin: 0 0 10px;
+	padding: 2px;
+	padding-top: 10px;
+	text-align: center;
+	box-sizing: border-box;
+	font-family: 'intro_bold_capsregular' !important;
+	font-size: 16px
+}
