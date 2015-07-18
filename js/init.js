@@ -83,8 +83,6 @@
 
 // Variables globales del objeto mapa y dirección del webservice de consulta de domicilios.
 var map;
-$.getScript("js/var.js");
-
 /**
  * Función para dibujar la marca en el mapa principal
  * @param {lat} coordenada de lat 
@@ -381,77 +379,16 @@ function hace_mapa(lat, lng, texto, esc) {
  * @returns {integer}
  */
 function chkCon() {
-	var ip;
-	
-    //Recupera ip privada
-
-	// NOTE: window.RTCPeerConnection is "not a constructor" in FF22/23
-	var RTCPeerConnection = /*window.RTCPeerConnection ||*/ window.webkitRTCPeerConnection || window.mozRTCPeerConnection;
-
-	if (RTCPeerConnection) (function () {
-	    var rtc = new RTCPeerConnection({iceServers:[]});
-	    if (1 || window.mozRTCPeerConnection) {      // FF [and now Chrome!] needs a channel/stream to proceed
-	        rtc.createDataChannel('', {reliable:false});
-	    };
-	    
-	    rtc.onicecandidate = function (evt) {
-	        // convert the candidate to SDP so we can run it through our general parser
-	        // see https://twitter.com/lancestout/status/525796175425720320 for details
-	        if (evt.candidate) grepSDP("a="+evt.candidate.candidate);
-	    };
-	    rtc.createOffer(function (offerDesc) {
-	        grepSDP(offerDesc.sdp);
-	        rtc.setLocalDescription(offerDesc);
-	    }, function (e) { console.warn("offer failed", e); });
-	    
-	    
-	    var addrs = Object.create(null);
-	    addrs["0.0.0.0"] = false;
-	    function updateDisplay(newAddr) {
-	        if (newAddr in addrs) return;
-	        else addrs[newAddr] = true;
-	        var displayAddrs = Object.keys(addrs).filter(function (k) { return addrs[k]; });
-	        ip = displayAddrs.join(" or perhaps ") || "n/a";
-	    }
-	    
-	    function grepSDP(sdp) {
-	        var hosts = [];
-	        sdp.split('\r\n').forEach(function (line) { // c.f. http://tools.ietf.org/html/rfc4566#page-39
-	            if (~line.indexOf("a=candidate")) {     // http://tools.ietf.org/html/rfc4566#section-5.13
-	                var parts = line.split(' '),        // http://tools.ietf.org/html/rfc5245#section-15.1
-	                    addr = parts[4],
-	                    type = parts[7];
-	                if (type === 'host') updateDisplay(addr);
-	            } else if (~line.indexOf("c=")) {       // http://tools.ietf.org/html/rfc4566#section-5.7
-	                var parts = line.split(' '),
-	                    addr = parts[2];
-	                updateDisplay(addr);
-	            }
-	        });
-	    }
-	})();	
-
-	//Recupera ip pública
-	if (window.XMLHttpRequest)
-		xmlhttp = new XMLHttpRequest();
-	else
-		xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
-	xmlhttp.open("GET", "http://api.hostip.info/get_html.php", false);
-	xmlhttp.send();
-	var hostipInfo = xmlhttp.responseText.split("\n");
-	for (i = 0; hostipInfo.length > i; i++) {
-		ipAddress = hostipInfo[i].split(":");
-		if (ipAddress[0] == "IP")
-			ip = ip +","+ $.trim(ipAddress[1]);
-	}
-
+	var nav = navigator.appName+navigator.appVersion+','+
+		((typeof navigator.browserLanguage !== 'undefined') ? navigator.browserLanguage : ((typeof navigator.language !== 'undefined') ? navigator.language : ''))
+		+','+screen.width+'x'+screen.height+'x'+screen.colorDepth;
 	var n;
 	$.ajax({
 		url : SEIEG+"n.php",
 		async : false,
 		data : {
 			'tg' : 'yhteys',
-			'ip' : ip
+			'nv' : nav
 		}
 	}).done(function(dta) {
 		if (dta.suc === 'oikea')
@@ -486,10 +423,10 @@ $(function() {
  
 	// Verifica el almacenamiento
 	if((typeof localStorage.idu == 'undefined') || (typeof localStorage.sdu == 'undefined')) {
+		var n = chkCon();
 		try {
 			// Limpia el caché, solo en este caso
 			localStorage.clear();
-			var n = chkCon();
 			localStorage.setItem( "idu", n[0].toString());
 			localStorage.setItem( "sdu", n[1].toString());
 		}
@@ -508,9 +445,32 @@ $(function() {
 			var n = chkCon();
 			localStorage.setItem( "idu", n[0].toString());
 			localStorage.setItem( "sdu", n[1].toString());
+		} else {
+			// Declara el uso del código
+			$.ajax({
+				url : SEIEG+"n.php",
+				async : false,
+				data : {
+					'tg' : 'yhteys',
+					'id' : localStorage.idu,
+					'sd' : localStorage.sdu
+				}
+			}).done(function(dta) {
+				if (dta.suc !== 'oikea') {
+					// Contraseña incorrecta
+					$(document.body).empty();
+					$(document.body).append(
+				    '<p></p><div class="container">'+
+				    '<div class="alert alert-danger alert-dismissible fade in" role="alert">'+
+				    '<h4>¡Contraseña incorrecta!</h4>'+
+				    '<p>Limpiar el cache del navegador.</p>'+
+				    '</div></div>');
+					return;
+				}
+			});
 		}
 	}
-	
+
 	// Si no ha habido conexión con el servidor del SEIEG.
 	if( parseInt(localStorage.idu) === 0 ) {
 		$(document.body).empty();
