@@ -1,1 +1,1 @@
-var SEIEG = "http://127.0.0.1:8080/lib/"
+var SEIEG = "http://localhost:8080/dom/lib/"

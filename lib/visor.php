@@ -6,7 +6,7 @@ if(!$result) {
 	$etag = 'Error#10';
 } else {
 	$reg = pg_fetch_assoc($result);
-	$etag = '2015v2.01m'.$reg['count'];
+	$etag = '2015v2.02m'.$reg['count'];
 }
 $jsonp_callback = isset($_GET['callback']) ? preg_replace('/[^a-z0-9$_]/si', '', $_GET['callback']) : false;
 header('Access-Control-Allow-Origin: *');
@@ -52,6 +52,7 @@ if(!$result) {
 }
 
 $mas = 0;
+$id = 0;
 echo "{\"type\":\"FeatureCollection\",\"features\":[";
 if ($reg = pg_fetch_assoc($result)) {
 	do {
@@ -62,18 +63,20 @@ if ($reg = pg_fetch_assoc($result)) {
 		echo "\"type\":\"Feature\",";
 		
 		echo "\"geometry\":{\"type\":\"Point\",\"coordinates\":";
-		echo "[".$reg['lon'].",".$reg['lat']."]},";
+		echo "[".round($reg['lon'], 5).",".round($reg['lat'], 5)."]},";
 
 		echo "\"properties\":{";
-			echo "\"id\":\"".$reg['dnt']."\",";
+			echo "\"id\":".$id.",";
+			echo "\"dn\":\"".$reg['dnt']."\",";
 			if($reg['ref4'] != "") {
 				echo "\"ds\":\"".$reg['ref4']."\",";
-			}echo "\"show_on_map\":true";
-			
+			}
+			echo "\"show_on_map\":true";
 		echo "}";
 		
 		echo "}";
 		$mas = 1;
+		$id = $id + 1;
 	} while ($reg = pg_fetch_assoc($result));
 }
 echo "]}";
