@@ -67,11 +67,10 @@ if ($reg = pg_fetch_assoc($result)) {
 
 		echo "\"properties\":{";
 			echo "\"id\":".$id.",";
-			echo "\"dn\":\"".$reg['dnt']."\",";
+			echo "\"dn\":\"".$reg['dnt']."\"";
 			if($reg['ref4'] != "") {
-				echo "\"ds\":\"".$reg['ref4']."\",";
+				echo ",\"ds\":\"".$reg['ref4']."\"";
 			}
-			echo "\"show_on_map\":true";
 		echo "}";
 		
 		echo "}";

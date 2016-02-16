@@ -18,9 +18,9 @@ if(!ob_start('ob_gzhandler')) ob_start();
 echo ($jsonp_callback ? jsonp_callback . '(' : '');
 
 $sql = "(SELECT lat, lon FROM geocode1 WHERE cve_via IN ".
-			"(SELECT cve_via FROM vialidad WHERE via_unica = ".$_GET["c"].") AND num = '".$_GET["n"]."') UNION ".
+		"(SELECT via_unica FROM vialidad WHERE cve_via = ".$_GET["c"].") AND num LIKE '".$_GET["n"]."') UNION ".
 		"(SELECT lat, lon FROM geocode0 WHERE cve_via IN ".
-			"(SELECT cve_via FROM vialidad WHERE via_unica = ".$_GET["c"].") AND num = '".$_GET["n"]."') ;";
+		"(SELECT via_unica FROM vialidad WHERE cve_via = ".$_GET["c"].") AND num LIKE '".$_GET["n"]."') ;";
 $result = pg_query($dbconn, $sql);
 if (!$result) {
 	echo "{\"Error\": 802}";

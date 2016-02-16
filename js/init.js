@@ -1,6 +1,6 @@
 /*!
  * @summary Captura y localización de domicilios geográficos
- * @version 2.0
+ * @version 2.1
  * @author Mario Hernández Morales / 2014-2015
  * @copyrigh Instituto de Planeación, Estadística y Geografía del Estado de Guanaguato.
  * @license GPL version 3 or any later version; http://www.gnu.org/copyleft/gpl.html
@@ -68,12 +68,12 @@
  * Desarrollo de Aplicaciones en HTML5 y para Dispositivos Móviles Firefox O.S.
  * 2014.
  * 
- * https://code.jquery.com/								1.11.3
- * http://getbootstrap.com/getting-started/#download	3.3.4
+ * https://code.jquery.com/								1.12.0
+ * http://getbootstrap.com/getting-started/#download	3.3.6
  * http://brianreavis.github.io/selectize.js/			0.12.1
  * http://plugins.jquery.com/validate/					1.1.2
  * https://maps.google.com/maps/api/js					
- * http://hpneo.github.io/gmaps/						0.4.18
+ * http://hpneo.github.io/gmaps/						0.4.22
  */
 
 // @alert Generar el archivo mini en producto final y utilizarlo:
@@ -91,8 +91,8 @@ var map;
  * @return {} 
  */
 function hace_marca(lat, lng, texto) {
-	$('#cx').val(lat.toFixed(8));
-	$('#cy').val(lng.toFixed(8));
+	$('#cx').val(lat.toFixed(5));
+	$('#cy').val(lng.toFixed(5));
 
 	// Mover y cachar coordenadas.
 	// Al mover la marca (ubicación en el mapa del globo) se obtienen las
@@ -107,8 +107,8 @@ function hace_marca(lat, lng, texto) {
 		icon: new google.maps.MarkerImage("img/marker-icon.png"),
 		draggable: true, //@fix Solo en Firefox movil android al arrastrar la marca se mueve el fondo del mapa!
 		dragend: function(e) {
-			$('#cx').val(e.latLng.lat().toFixed(8));
-			$('#cy').val(e.latLng.lng().toFixed(8));
+			$('#cx').val(e.latLng.lat().toFixed(5));
+			$('#cy').val(e.latLng.lng().toFixed(5));
 		}
 	});
 }
@@ -143,7 +143,7 @@ function T2Q(x, y, zoom) {
  * @param {Text} texto
  * @return {}
  */
-function hace_mapa(lat, lng, texto, esc) {
+function hace_mapa(lat, lng, texto, esc) {	
 	esc = typeof esc !== 'undefined' ? esc : 8;
 	if (typeof map === "undefined") {
 		// @todo Colocar los créditos del Iplaneg en el mapa desplegable.
@@ -155,7 +155,7 @@ function hace_mapa(lat, lng, texto, esc) {
 			minZoom: 8,
 			maxZoom: 21,
 			mapTypeControlOptions: {
-				mapTypeIds : ["hybrid", "roadmap", "satellite", "terrain", "osm", "aerial", "mapquest", "bing", "colonias"]
+				mapTypeIds : ["hybrid", "roadmap", "satellite", "terrain", "osm", "aerial", "mapquest", "bing", "esri"]
 			}
 		});
 		map.addMapType("osm", {
@@ -190,102 +190,29 @@ function hace_mapa(lat, lng, texto, esc) {
 			name: "Bing",
 			maxZoom: 19
 		});
-		var colonias = {
-				index: 0,
-				getTileUrl: function(coord, zoom) {	
-					return "http://geoinfo.iplaneg.net/geoserver/gwc/service/gmaps?layers=geonode:colonias2014&zoom="+zoom+"&x="+coord.x+"&y="+coord.y+"&format=image/png8";
-				},
-				tileSize: new google.maps.Size(256, 256),
-				name: "Colonias",
-				isPng: true,
-	            opacity: 0.9,
-				maxZoom: 20
-		};
-		map.addMapType("colonias", colonias);
-
-		//@todo Que la capa de colonias permanezca superpuesta con un fondo como Mapquest.
-		/*https://developers.google.com/maps/documentation/javascript/examples/overlay-hideshow?hl=es*/
-		/*https://developers.google.com/maps/documentation/javascript/examples/maptype-image-overlay?hl=es*/
-		
-		map.setMapTypeId("mapquest");
-
-		map.addControl({
-			position: 'right_top',
-			content: 'Ubicar',
-			style: {
-				'direction': 'ltr',
-				'overflow': 'hidden',
-				'text-align': 'center',
-				'position': 'relative',
-				'font-family': 'Roboto,Arial,sans-serif',
-				'-moz-user-select': 'none',
-				'font-size': '11px',
-				'padding': '1px 6px',
-				'margin':'5px',
-				'border-radius':'2px',
-				'background-clip': 'padding-box',
-				'border': '1px solid rgba(51, 51, 51, 0.25)',
-				'box-shadow': '0px 1px 4px -1px rgba(0, 0, 0, 0.3)',
-				'min-width': '23px',
-				'-moz-box-sizing': 'border-box',
-				'color': 'rgb(86, 86, 86)',
-				'background': 'rgb(255, 255, 255)'
+		map.addMapType("osm", {
+			getTileUrl: function(coord, zoom) {
+				return "http://"+"abc".charAt(Math.floor(Math.random()*3))+".tile.openstreetmap.org/"+zoom+"/"+coord.x+"/"+coord.y+".png";
 			},
-			events: {
-				click: ubicar_direccion,
-				mouseover: function() {
-					$(this).css({
-						'color': 'rgb(0, 0, 0)',
-						'background': 'rgb(235, 235, 235)'
-					});
-				},
-				mouseout: function() {
-					$(this).css({
-						'color': 'rgb(86, 86, 86)',
-						'background': 'rgb(255, 255, 255)'
-					});
-				}
-			}
+			tileSize: new google.maps.Size(256, 256),
+			name: "OSM",
+			maxZoom: 19
 		});
-
-		map.addControl({
-			position: 'right_top',
-			content: 'Latlon',
-			style: {
-				'direction': 'ltr',
-				'overflow': 'hidden',
-				'text-align': 'center',
-				'position': 'relative',
-				'font-family': 'Roboto,Arial,sans-serif',
-				'-moz-user-select': 'none',
-				'font-size': '11px',
-				'padding': '1px 6px',
-				'margin':'5px',
-				'border-radius':'2px',
-				'background-clip': 'padding-box',
-				'border': '1px solid rgba(51, 51, 51, 0.25)',
-				'box-shadow': '0px 1px 4px -1px rgba(0, 0, 0, 0.3)',
-				'min-width': '23px',
-				'-moz-box-sizing': 'border-box',
-				'color': 'rgb(86, 86, 86)',
-				'background': 'rgb(255, 255, 255)'
+		map.addMapType("esri", {
+			getTileUrl: function(coord, zoom) {
+				//if(zoom < 14)
+					//return "http://"+"server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/"+zoom+"/"+coord.y+"/"+coord.x+".png";
+				//else
+					return "http://"+"server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/"+zoom+"/"+coord.y+"/"+coord.x+".png";
 			},
-			events: {
-				click: ubicar_latlon,
-				mouseover: function() {
-					$(this).css({
-						'color': 'rgb(0, 0, 0)',
-						'background': 'rgb(235, 235, 235)'
-					});
-				},
-				mouseout: function() {
-					$(this).css({
-						'color': 'rgb(86, 86, 86)',
-						'background': 'rgb(255, 255, 255)'
-					});
-				}
-			}
+			tileSize: new google.maps.Size(256, 256),
+			name: "Esri",
+			maxZoom: 19,
+			attribution:
+				'{attribution.Esri} &mdash; ' +
+				'Esri, DeLorme, NAVTEQ, TomTom, Intermap, iPC, USGS, FAO, NPS, NRCAN, GeoBase, Kadaster NL, Ordnance Survey, Esri Japan, METI, Esri China (Hong Kong), and the GIS User Community'
 		});
+		map.setMapTypeId("esri");
 
 		map.addControl({
 			position: 'right_top',
@@ -335,6 +262,15 @@ function hace_mapa(lat, lng, texto, esc) {
 			control: 'map',
 			options: [
 			{
+				title: 'Ir',
+				name: 'move_beyond',
+				action: function(e) {
+					// Referencia a las coordenadas de la marca actual.
+					p = this.markers[0].getPosition();
+					this.setCenter(Number(p.lat()), Number(p.lng()));
+				}
+			},
+			{
 				title: 'Centrar',
 				name: 'center_here',
 				action: function(e) {
@@ -350,12 +286,21 @@ function hace_mapa(lat, lng, texto, esc) {
 				}
 			},
 			{
-				title: 'Ir',
-				name: 'move_beyond',
-				action: function(e) {
-					// Referencia a las coordenadas de la marca actual.
-					p = this.markers[0].getPosition();
-					this.setCenter(Number(p.lat()), Number(p.lng()));
+				title: 'Ubicar',
+				name: 'ubicar_direccion',
+				action: ubicar_direccion
+			},
+			{
+				title: 'Coordenadas',
+				name: 'ubicar_latlon',
+				action: ubicar_latlon
+			},
+			{
+				title: 'Cerrar',
+				name: 'cerrar_marco',
+				action: function() {
+					$('#map').parent().fadeOut('slow');
+					$('#vmap').show();
 				}
 			}
 			]
@@ -483,6 +428,10 @@ $(function() {
 	    return;
 	}
 
+	// Actualiza link para QGis
+	
+	$('#aqgis').attr("href", SEIEG+"visor.php?i="+localStorage.idu+"&s="+localStorage.sdu);
+	
 	// Localidad
 	localStorage.loc  = (localStorage.loc  || "");
 	localStorage.locm = (localStorage.locm || "");
